@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import com.example.firebaseproviderauth.databinding.ActivityMainBinding
+import com.facebook.FacebookSdk
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
@@ -30,6 +31,9 @@ class MainActivity : AppCompatActivity() {
                             .build()
                     ).build()
                 )
+                add(AuthUI.IdpConfig.PhoneBuilder().build())
+                add(AuthUI.IdpConfig.GoogleBuilder().build())
+//                add(AuthUI.IdpConfig.FacebookBuilder().build())
             }
             return providers
         }
@@ -46,7 +50,7 @@ class MainActivity : AppCompatActivity() {
             this.onSignInResult(result)
         }
 
-        if(user != null && user!!.isEmailVerified){
+        if((user != null && user!!.isEmailVerified) || (user != null && user!!.phoneNumber != null)){
             Toast.makeText(this, "angemeldet und bestätigt", Toast.LENGTH_SHORT).show()
         }else{
             authenticate()
@@ -54,10 +58,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult?) {
-        val resonse = result!!.idpResponse
+        val response = result!!.idpResponse
         if(result.resultCode == RESULT_OK){
             val user = auth.currentUser
-            if(user!!.isEmailVerified){
+            if(user!!.isEmailVerified || user!!.phoneNumber != null){
                 Toast.makeText(this, "angemeldet und bestätigt", Toast.LENGTH_SHORT).show()
             }else{
                 user.sendEmailVerification().addOnCompleteListener { task ->
